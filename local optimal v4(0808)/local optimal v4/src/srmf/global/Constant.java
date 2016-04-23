@@ -75,6 +75,13 @@ public class Constant {
 		 * cost_of_detector
 		 */
 		public static double cost_of_detector;
+		
+		/*
+		 * cost of the link bandwidth
+		 */
+		
+		public static double avg_cost_of_link_bandwidth;
+		public static double varition_cost_of_link_bandwidth;
 
 		public static double getY() {
 			return y;
@@ -90,6 +97,24 @@ public class Constant {
 
 		public static void setCost_of_detector(double cost_of_detector) {
 			Cost.cost_of_detector = cost_of_detector;
+		}
+
+		public static double getAvg_cost_of_link_bandwidth() {
+			return avg_cost_of_link_bandwidth;
+		}
+
+		public static void setAvg_cost_of_link_bandwidth(
+				double avg_cost_of_link_bandwidth) {
+			Cost.avg_cost_of_link_bandwidth = avg_cost_of_link_bandwidth;
+		}
+
+		public static double getVarition_cost_of_link_bandwidth() {
+			return varition_cost_of_link_bandwidth;
+		}
+
+		public static void setVarition_cost_of_link_bandwidth(
+				double varition_cost_of_link_bandwidth) {
+			Cost.varition_cost_of_link_bandwidth = varition_cost_of_link_bandwidth;
 		}
 	}
 
