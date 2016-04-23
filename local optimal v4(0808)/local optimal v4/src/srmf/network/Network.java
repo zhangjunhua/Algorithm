@@ -3,6 +3,7 @@ package srmf.network;
 public class Network {
 	public Node[] nodes;
 	public Link[] links;
+	public SRLG[] srlgs;
 
 	public Network() {
 		// TODO Auto-generated constructor stub
@@ -11,6 +12,12 @@ public class Network {
 	public Network(Node[] nodes, Link[] links) {
 		this.nodes = nodes;
 		this.links = links;
+	}
+
+	public Network(Node[] nodes, Link[] links, SRLG[] srlgs) {
+		this.nodes = nodes;
+		this.links = links;
+		this.srlgs = srlgs;
 	}
 
 	public Node[] getNodes() {
@@ -27,6 +34,16 @@ public class Network {
 
 	public void setLinks(Link[] links) {
 		this.links = links;
+	}
+	
+	
+
+	public SRLG[] getSrlgs() {
+		return srlgs;
+	}
+
+	public void setSrlgs(SRLG[] srlgs) {
+		this.srlgs = srlgs;
 	}
 
 	@Override

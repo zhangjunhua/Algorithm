@@ -3,9 +3,6 @@ package srmf.network.generator;
 import java.util.Random;
 
 import org.junit.Test;
-
-import com.sun.jndi.url.iiopname.iiopnameURLContextFactory;
-
 import srmf.global.Constant;
 import srmf.network.Link;
 import srmf.network.Network;
@@ -65,21 +62,23 @@ public class NetworkGenerator {
 			links[i].linkNodes(nodes[a], nodes[b]);
 			nodes[a].addAjacent_link(links[i]);
 			nodes[b].addAjacent_link(links[i]);
-			
+
 		}
-		for(int j=0;j<links.length;j++)
-		{
-			
-			links[j].setCost(Math.max(Constant.Cost.minimum_cost, random.nextGaussian()*Constant.Cost.varition_cost_of_link_bandwidth+Constant.Cost.avg_cost_of_link_bandwidth));
+		for (int j = 0; j < links.length; j++) {
+
+			links[j].setCost(Math.max(Constant.Cost.minimum_cost,
+					random.nextGaussian()
+							* Constant.Cost.varition_cost_of_link_bandwidth
+							+ Constant.Cost.avg_cost_of_link_bandwidth));
 		}
 		return links;
-		
+
 	}
 
 	/*
 	 * 生成SRGLs的算法： 首先随机分配每个srlg的link的个数, 其次将每个link分配一次， 最后把他们补满. 最后去重
 	 */
-	public static SRLG[] generateSRLGs(Network network) {
+	public static SRLG[] generateSRLGs(Link[] links) {
 		if (Constant.SrlgProperty.avg_link * 2 > Constant.GraphProperty.m) {
 			throw new RuntimeException(
 					"Constant.SrlgProperty.avg_link*2>Constant.GraphProperty.m");
@@ -91,39 +90,39 @@ public class NetworkGenerator {
 		for (int i = 0; i < srlgs.length; i++) {
 			srlgs[i] = new SRLG(i);
 		}
-		int sum=0;
-		while (sum<network.getLinks().length) {
-			sum=0;
+		int sum = 0;
+		while (sum < links.length) {
+			sum = 0;
 			for (int i = 0; i < srlgs.length; i++) {
 				SRLGsize[i] = random
 						.nextInt(2 * Constant.SrlgProperty.avg_link - 1) + 1;
-				sum+=SRLGsize[i];
+				sum += SRLGsize[i];
 			}
-			
+
 		}
-//		for(int i=0;i<SRLGsize.length;i++)
-//			System.out.print(SRLGsize[i]+" ");
-//		System.out.println();
+		// for(int i=0;i<SRLGsize.length;i++)
+		// System.out.print(SRLGsize[i]+" ");
+		// System.out.println();
 		/*
 		 * 将每个link分配一次
 		 */
-		for (int i = 0; i < network.getLinks().length; i++) {
+		for (int i = 0; i < links.length; i++) {
 			// System.out.println(srlgs.length+" "+Constant.SrlgProperty.getSrlg_num());
 			int index = random.nextInt(srlgs.length);
 			while (SRLGsize[index] == srlgs[index].getLinks().size()) {
 				index = random.nextInt(srlgs.length);
 			}
-			srlgs[index].addLinks(network.getLinks()[i]);
+			srlgs[index].addLinks(links[i]);
 		}
 		/*
 		 * 补满
 		 */
 		for (int i = 0; i < srlgs.length; i++) {
 			while (srlgs[i].getLinks().size() < SRLGsize[i]) {
-				int index = random.nextInt(network.getLinks().length);
-				while (srlgs[i].getLinks().contains(network.getLinks()[index]))
-					index = random.nextInt(network.getLinks().length);
-				srlgs[i].addLinks(network.getLinks()[index]);
+				int index = random.nextInt(links.length);
+				while (srlgs[i].getLinks().contains(links[index]))
+					index = random.nextInt(links.length);
+				srlgs[i].addLinks(links[index]);
 			}
 		}
 		/*
@@ -140,13 +139,11 @@ public class NetworkGenerator {
 							unique = false;
 							srlgs[i].getLinks().clear();
 							while (srlgs[i].getLinks().size() < SRLGsize[i]) {
-								int index = random
-										.nextInt(network.getLinks().length);
+								int index = random.nextInt(links.length);
 								while (srlgs[i].getLinks().contains(
-										network.getLinks()[index]))
-									index = random
-											.nextInt(network.getLinks().length);
-								srlgs[i].addLinks(network.getLinks()[index]);
+										links[index]))
+									index = random.nextInt(links.length);
+								srlgs[i].addLinks(links[index]);
 							}
 							break out;
 						}
@@ -156,16 +153,14 @@ public class NetworkGenerator {
 			if (unique)
 				break;
 		}
-		invert_index(network, srlgs);
+		invert_index(srlgs);
 		return srlgs;
 	}
-	
-	public static void invert_index(Network network,SRLG[] srlgs){
-		
-		for(int i=0;i<srlgs.length;i++)
-		{
-			for(int j=0;j<srlgs[i].getLinks().size();j++)
-			{
+
+	public static void invert_index(SRLG[] srlgs) {
+
+		for (int i = 0; i < srlgs.length; i++) {
+			for (int j = 0; j < srlgs[i].getLinks().size(); j++) {
 				srlgs[i].getLinks().get(j).addSrlg(srlgs[i]);
 			}
 		}
@@ -174,7 +169,9 @@ public class NetworkGenerator {
 	public static Network generateNetwork() {
 		Node[] nodes = generateNodes();
 		Link[] links = generateLinks(nodes);
-		return new Network(nodes, links);
+		SRLG[] srlgs = generateSRLGs(links);
+		return new Network(nodes, links, srlgs);
+
 	}
 
 	@Test
@@ -199,14 +196,14 @@ public class NetworkGenerator {
 		Constant.SrlgProperty.srlg_num = 3;
 		Network network = generateNetwork();
 		System.out.println(network);
-		SRLG[] srlgs = generateSRLGs(network);
+		SRLG[] srlgs = network.getSrlgs();
 		for (int i = 0; i < srlgs.length; i++)
 			System.out.println(srlgs[i]);
 	}
-	
+
 	@Test
-	public void test4(){
-		for(int i=0;i<100;i++)
+	public void test4() {
+		for (int i = 0; i < 100; i++)
 			test3();
 	}
 
