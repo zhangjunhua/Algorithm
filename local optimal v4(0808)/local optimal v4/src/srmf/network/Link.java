@@ -10,7 +10,15 @@ public class Link {
 	public int linkID;
 	public Node[] endNodes = new Node[2];
 	public ArrayList<SRLG> srlgs=new ArrayList<>();
-	
+	public double Cost;
+	public double getCost() {
+		return Cost;
+	}
+
+	public void setCost(double cost) {
+		Cost = cost;
+	}
+
 	public Link() {
 		// TODO Auto-generated constructor stub
 	}

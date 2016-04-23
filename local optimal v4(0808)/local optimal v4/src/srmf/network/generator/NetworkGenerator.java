@@ -4,6 +4,8 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import com.sun.jndi.url.iiopname.iiopnameURLContextFactory;
+
 import srmf.global.Constant;
 import srmf.network.Link;
 import srmf.network.Network;
@@ -63,8 +65,15 @@ public class NetworkGenerator {
 			links[i].linkNodes(nodes[a], nodes[b]);
 			nodes[a].addAjacent_link(links[i]);
 			nodes[b].addAjacent_link(links[i]);
+			
+		}
+		for(int j=0;j<links.length;j++)
+		{
+			
+			links[j].setCost(Math.max(Constant.Cost.minimum_cost, random.nextGaussian()*Constant.Cost.varition_cost_of_link_bandwidth+Constant.Cost.avg_cost_of_link_bandwidth));
 		}
 		return links;
+		
 	}
 
 	/*

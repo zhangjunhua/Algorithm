@@ -82,6 +82,14 @@ public class Constant {
 		
 		public static double avg_cost_of_link_bandwidth;
 		public static double varition_cost_of_link_bandwidth;
+		public static double minimum_cost;
+		public static double getMinimum_cost() {
+			return minimum_cost;
+		}
+
+		public static void setMinimum_cost(double minimum_cost) {
+			Cost.minimum_cost = minimum_cost;
+		}
 
 		public static double getY() {
 			return y;
