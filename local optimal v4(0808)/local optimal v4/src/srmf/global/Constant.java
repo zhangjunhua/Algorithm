@@ -98,7 +98,11 @@ public class Constant {
 		 * iteration times:N
 		 */
 		public static int N;
-		
+		/*
+		 * C1,C2,C3
+		 * 赋权重时需要的常量
+		 */
+		public static int C1,C2,C3;
 		
 		/*
 		 * Experiment 1
@@ -132,6 +136,38 @@ public class Constant {
 
 		public static void setWeightStrategy(WeightStrategy weightStrategy) {
 			Strategy.weightStrategy = weightStrategy;
+		}
+
+		public static int getN() {
+			return N;
+		}
+
+		public static void setN(int n) {
+			N = n;
+		}
+
+		public static int getC1() {
+			return C1;
+		}
+
+		public static void setC1(int c1) {
+			C1 = c1;
+		}
+
+		public static int getC2() {
+			return C2;
+		}
+
+		public static void setC2(int c2) {
+			C2 = c2;
+		}
+
+		public static int getC3() {
+			return C3;
+		}
+
+		public static void setC3(int c3) {
+			C3 = c3;
 		}
 	}
 }
