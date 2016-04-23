@@ -1,0 +1,16 @@
+.classpath
+.project
+.settings
+*.txt
+*.xml
+*.class
+*.jar
+DataReplication/*
+#local optimal v4(0808)/
+#local optimal v4(0808)/local optimal v4/src/srmf
+local optimal v4(0808)/local optimal v4/src/ReadWriteFlie
+local optimal v4(0808)/local optimal v4/src/Junit
+local optimal v4(0808)/local optimal v4/src/newClass
+local optimal v4(0808)/local optimal v4/src/strategies
+local optimal v4(0808)/local optimal v4/src/utilities
+local optimal v4(0808)/local optimal v4/src/xmlGenerator
