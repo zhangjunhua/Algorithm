@@ -120,9 +120,15 @@ public class SRMF {
 		
 		
 		
-
 		return new M_trail();
 	}
+	
+	public static M_trail connect_parts(Part_set part_set,Srmf_Solution solution){
+		
+		
+		return new M_trail();
+	}
+	
 
 	/**
 	 * 求 NUSS_c和P_j的交集

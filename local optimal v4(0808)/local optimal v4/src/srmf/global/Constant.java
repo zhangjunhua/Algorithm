@@ -136,6 +136,12 @@ public class Constant {
 		 * 赋权重时需要的常量
 		 */
 		public static int C1,C2,C3;
+		/**
+		 * 连接各个part时，最长的路径
+		 * @author Admin
+		 *
+		 */
+		public static int C;
 		
 		/*
 		 * Experiment 1
@@ -165,6 +171,14 @@ public class Constant {
 
 		public static WeightStrategy getWeightStrategy() {
 			return weightStrategy;
+		}
+
+		public static int getC() {
+			return C;
+		}
+
+		public static void setC(int c) {
+			C = c;
 		}
 
 		public static void setWeightStrategy(WeightStrategy weightStrategy) {
