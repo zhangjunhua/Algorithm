@@ -86,6 +86,16 @@ public class Link {
 	public void addSrlg(SRLG srlg) {
 		this.srlgs.add(srlg);
 	}
+	public Node getNeighbourNode(Node node) {
+		if(endNodes[0].getNodeID()==node.getNodeID())
+			return endNodes[1];
+		else if(endNodes[1].getNodeID()==node.getNodeID())
+			return endNodes[0];
+		else {
+			throw new RuntimeException();
+		}
+		
+	}
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
