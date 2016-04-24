@@ -2,8 +2,8 @@ package srmf.strategy;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Map.Entry;
-
 import srmf.global.Constant;
 import srmf.network.Link;
 import srmf.network.Network;
@@ -19,6 +19,10 @@ import srmf.solution.Srmf_Solution;
  *
  */
 public class SRMF {
+	
+	
+	
+	
 
 	/**
 	 * version 1.0 ‎ 2016‎年‎4‎月‎23‎日 22:35:06
@@ -104,31 +108,62 @@ public class SRMF {
 				}
 			}
 		}
-		//找到ex_node
-		Node ex_node=solution.getNetwork().getNodes()[0];
-		for(int i=0;i<nodes_degrees.length;i++){
-			if(nodes_included[i]){
-				if(nodes_degrees[ex_node.getNodeID()]<nodes_degrees[i])
-					ex_node=solution.getNetwork().getNodes()[i];
+		// 找到ex_node
+		Node ex_node = solution.getNetwork().getNodes()[0];
+		for (int i = 0; i < nodes_degrees.length; i++) {
+			if (nodes_included[i]) {
+				if (nodes_degrees[ex_node.getNodeID()] < nodes_degrees[i])
+					ex_node = solution.getNetwork().getNodes()[i];
 			}
 		}
-		//把ex_node放入Part
-		Part part=Part.get_initial_part(ex_node);
+		// 把ex_node放入Part
+		Part part = Part.get_initial_part(ex_node);
 		part_set.addPart(part);
-		//拓展part
-		
-		
-		
-		
+		// 拓展part
+		double[] weight = new double[ex_node.getAjacent_links().size()];
+
+		ArrayList<Link> links = new ArrayList<>();
+
+		for (Entry<String, HashSet<SRLG>> entry : solution.getAct().entrySet()) {
+			String key = entry.getKey();
+			HashSet<SRLG> value = entry.getValue();
+			if (value.size() > 1) {
+				ArrayList<Link> temp_links = new ArrayList<>();
+				for (SRLG srlg : value) {
+					for (Link link : srlg.getLinks()) {
+						if (!temp_links.contains(link))
+							temp_links.add(link);
+					}
+				}
+				Random random = new Random();
+				Link link;
+				while (true) {
+					link = temp_links.get(random.nextInt(temp_links.size()));
+					int k = 0;
+					for (SRLG srlg : value) {
+						if (link.getSrlgs().contains(srlg))
+							k++;
+					}
+					if (k > 0 && k != value.size())
+						break;
+				}
+				links.add(link);
+			} else if (value.size() == 1 && !key.contains("0")) {
+				for (SRLG srlg : value) {
+					links.add(srlg.getLinks().get(0));
+				}
+			}
+		}
+		M_trail mTrail = new M_trail();
+		mTrail.setLinks(links);
+		return mTrail;
+	}
+
+	public static M_trail connect_parts(Part_set part_set,
+			Srmf_Solution solution) {
+
 		return new M_trail();
 	}
-	
-	public static M_trail connect_parts(Part_set part_set,Srmf_Solution solution){
-		
-		
-		return new M_trail();
-	}
-	
 
 	/**
 	 * 求 NUSS_c和P_j的交集
