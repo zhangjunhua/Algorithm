@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import srmf.global.Constant;
 import srmf.network.Link;
 import srmf.network.Network;
+import srmf.network.Node;
 import srmf.network.SRLG;
 import srmf.solution.M_trail;
 import srmf.solution.Part;
@@ -59,19 +60,19 @@ public class SRMF {
 	 */
 
 	public static M_trail nextTrail(Srmf_Solution solution) {
-		//***************初始化P_j****************
+		// ***************初始化P_j****************
 		Part_set part_set = new Part_set();
 
 		// **************构建子图****************
 		boolean[] nodes_included = new boolean[solution.getNetwork().getNodes().length];
-		
+
 		for (int i = 0; i < nodes_included.length; i++)
 			nodes_included[i] = false;
 		boolean[] links_included = new boolean[solution.getNetwork().getLinks().length];
-		
+
 		for (int i = 0; i < links_included.length; i++)
 			links_included[i] = false;
-		
+
 		for (Entry<String, HashSet<SRLG>> entry : solution.getAct().entrySet()) {
 			String key = entry.getKey();
 			HashSet<SRLG> value = entry.getValue();
@@ -88,13 +89,38 @@ public class SRMF {
 				}
 			}
 		}
+
+		// ******************寻找ex_node*********************
+		// 计算degree
+		int[] nodes_degrees = new int[solution.getNetwork().getNodes().length];
+		for (int i = 0; i < nodes_degrees.length; i++)
+			nodes_degrees[i] = 0;
+		for (int i = 0; i < nodes_degrees.length; i++) {
+			if (nodes_included[i]) {
+				for (Link link : solution.getNetwork().getNodes()[i]
+						.getAjacent_links()) {
+					if (links_included[link.linkID])
+						nodes_degrees[i]++;
+				}
+			}
+		}
+		//找到ex_node
+		Node ex_node=solution.getNetwork().getNodes()[0];
+		for(int i=0;i<nodes_degrees.length;i++){
+			if(nodes_included[i]){
+				if(nodes_degrees[ex_node.getNodeID()]<nodes_degrees[i])
+					ex_node=solution.getNetwork().getNodes()[i];
+			}
+		}
+		//把ex_node放入Part
+		Part part=Part.get_initial_part(ex_node);
+		part_set.addPart(part);
+		//拓展part
 		
-		//******************寻找ex_node*********************
 		
 		
 		
-		
-		
+
 		return new M_trail();
 	}
 
