@@ -31,7 +31,25 @@ public class Network {
 	public Link[] getLinks() {
 		return links;
 	}
-
+	public boolean ExistAnEdge(int scr,int dir) {
+		for(int i=0;i<this.getLinks().length;i++)
+		{
+			if(((this.getLinks()[i].getEndNodes()[0].getNodeID()==scr)&&(this.getLinks()[1].getLinkID()==dir))||
+				((this.getLinks()[i].getEndNodes()[1].getNodeID()==scr)&&(this.getLinks()[0].getLinkID()==dir)))
+				return true;
+		}
+		return false;
+	}
+	public Link getLink(int scr,int dir) {
+		for(int i=0;i<this.getLinks().length;i++)
+		{
+			if(((this.getLinks()[i].getEndNodes()[0].getNodeID()==scr)&&(this.getLinks()[1].getLinkID()==dir))||
+				((this.getLinks()[i].getEndNodes()[1].getNodeID()==scr)&&(this.getLinks()[0].getLinkID()==dir)))
+				return this.getLinks()[i];
+		}
+	 throw new RuntimeException();
+	
+	}
 	public void setLinks(Link[] links) {
 		this.links = links;
 	}

@@ -25,7 +25,7 @@ public class SRMF {
 	
 
 	/**
-	 * version 1.0 ‎ 2016‎年‎4‎月‎23‎日 22:35:06
+	 * version 1.0 鈥� 2016鈥庡勾鈥�4鈥庢湀鈥�23鈥庢棩 22:35:06
 	 * 
 	 * @param network
 	 * @return Srmf_Solution
@@ -50,24 +50,24 @@ public class SRMF {
 	/*
 	 * get a new trail
 	 * 
-	 * 构建m-trail的算法：
+	 * 鏋勫缓m-trail鐨勭畻娉曪細
 	 * 
-	 * 1、构建Pj
+	 * 1銆佹瀯寤篜j
 	 * 
-	 * 1.1初始化P_j
+	 * 1.1鍒濆鍖朠_j
 	 * 
-	 * 1.2寻找ex_node_k
+	 * 1.2瀵绘壘ex_node_k
 	 * 
-	 * 找到所有由和P_j的交集为空的NUSS_C所构成的子图，然后在子图上找一个度数最大的节点
+	 * 鎵惧埌鎵�鏈夌敱鍜孭_j鐨勪氦闆嗕负绌虹殑NUSS_C鎵�鏋勬垚鐨勫瓙鍥撅紝鐒跺悗鍦ㄥ瓙鍥句笂鎵句竴涓害鏁版渶澶х殑鑺傜偣
 	 * 
-	 * 2、连接Pj
+	 * 2銆佽繛鎺j
 	 */
 
 	public static M_trail nextTrail(Srmf_Solution solution) {
-		// ***************初始化P_j****************
+		// ***************鍒濆鍖朠_j****************
 		Part_set part_set = new Part_set();
 
-		// **************构建子图****************
+		// **************鏋勫缓瀛愬浘****************
 		boolean[] nodes_included = new boolean[solution.getNetwork().getNodes().length];
 
 		for (int i = 0; i < nodes_included.length; i++)
@@ -94,8 +94,8 @@ public class SRMF {
 			}
 		}
 
-		// ******************寻找ex_node*********************
-		// 计算degree
+		// ******************瀵绘壘ex_node*********************
+		// 璁＄畻degree
 		int[] nodes_degrees = new int[solution.getNetwork().getNodes().length];
 		for (int i = 0; i < nodes_degrees.length; i++)
 			nodes_degrees[i] = 0;
@@ -159,14 +159,113 @@ public class SRMF {
 		return mTrail;
 	}
 
-	public static M_trail connect_parts(Part_set part_set,
-			Srmf_Solution solution) {
+	
+	/**
+	 * @param part_set
+	 * @param solution
+	 * @return
+	 */
+	public static M_trail connect_parts(Part_set part_set,Srmf_Solution solution){
+		boolean[] edgeFlag =new boolean[solution.getNetwork().getLinks().length];//索引向量
+		double[][] adjacencyMatrix=new double[solution.getNetwork().getNodes().length][solution.getNetwork().getNodes().length];//邻接表
+		M_trail m_trail=new M_trail();
+		//初始化,建立边索引向量
+		for(int i=0;i<solution.getNetwork().getLinks().length;i++)
+		{
+			edgeFlag[solution.getNetwork().getLinks()[i].getLinkID()]=true;
+		}
+		for(int j=0;j<part_set.getParts().size();j++)
+		{
+			for(int k=0;k<part_set.getParts().get(j).getLinks().size();k++)
+			{
+				edgeFlag[part_set.getParts().get(j).getLinks().get(k).getLinkID()]=false;
+			}
+		}
+		//建立邻接表
+		for(int l=0;l<solution.getNetwork().getNodes().length;l++)
+		{
+			for(int m=0;m<solution.getNetwork().getNodes().length;m++)
+			{
+				if(solution.getNetwork().ExistAnEdge(l, m))
+				{
+				adjacencyMatrix[l][m]=solution.getNetwork().getLink(l, m).getCost();
+				adjacencyMatrix[m][l]=solution.getNetwork().getLink(l, m).getCost();
+				}
+				else {
+					adjacencyMatrix[l][m]=Integer.MAX_VALUE;
+					adjacencyMatrix[m][l]=Integer.MAX_VALUE;
+				}
+				if(edgeFlag[solution.getNetwork().getLink(l, m).getLinkID()]==false)
+					adjacencyMatrix[l][m]=Integer.MAX_VALUE;
+					adjacencyMatrix[m][l]=Integer.MAX_VALUE;
+			}
+		}
+		//Floyd算法
+		      for(int k=0;k<solution.getNetwork().getNodes().length;k++)
+		         for(int i=0;i<solution.getNetwork().getNodes().length;i++)
+		              for(int j=0;j<solution.getNetwork().getNodes().length;j++)
+		                 if(adjacencyMatrix[i][k]+adjacencyMatrix[k][j]<adjacencyMatrix[i][j])
+		                	 adjacencyMatrix[i][j]=adjacencyMatrix[i][k]+adjacencyMatrix[k][j];
+		 //连接pkj
+		   for(int n=0;n<solution.getNetwork().getNodes().length;n++)
+			   for(int p=0;p<solution.getNetwork().getNodes().length;p++)
+			   {
+				   if(adjacencyMatrix[n][p]!=Integer.MAX_VALUE)
+					 if(IsdifferentPairConnect(n,p,part_set))
+					 { 	
+						 m_trail.setLinks(FindPairConnect(n,p,adjacencyMatrix,part_set));
+					 	part_set.getParts().get(GetDifferentTeams(n,p,part_set)[0]).getLinks().addAll(part_set.getParts().get(GetDifferentTeams(n,p,part_set)[1]).getLinks());
+					 	part_set.getParts().remove(GetDifferentTeams(n, p, part_set)[1]);
+					 	
+					 }
+			   }
+		return m_trail;
+	}
 
-		return new M_trail();
+	private static int[] GetDifferentTeams(int n, int p, Part_set part_set) {
+		// TODO Auto-generated method stub
+		int[] teams=new int[2];
+		int team1=Integer.MAX_VALUE,team2=Integer.MAX_VALUE;
+		for(int i=0;n<part_set.getParts().size();n++)
+			for(int j=0;j<part_set.getParts().get(i).getLinks().size();j++)
+				if(part_set.getParts().get(i).getLinks().get(j).getLinkID()==n)
+					team1=i;
+		for(int i=0;n<part_set.getParts().size();n++)
+			for(int j=0;j<part_set.getParts().get(i).getLinks().size();j++)
+				if(part_set.getParts().get(i).getLinks().get(j).getLinkID()==p)
+					team2=i;
+		teams[0]=team1;
+		teams[1]=team2;	
+		return teams;
+	}
+
+	private static ArrayList<Link> FindPairConnect(int n, int p,double[][] adjacencyMatrix,Part_set part_set) {
+		// TODO Auto-generated method stub
+		ArrayList<Link> links=new ArrayList<Link>();
+		
+		return links;
+	}
+
+	private static boolean IsdifferentPairConnect(int n, int p,Part_set part_set) {
+		// TODO Auto-generated method stub
+		int team1=Integer.MAX_VALUE,team2=Integer.MAX_VALUE;
+		for(int i=0;n<part_set.getParts().size();n++)
+			for(int j=0;j<part_set.getParts().get(i).getLinks().size();j++)
+				if(part_set.getParts().get(i).getLinks().get(j).getLinkID()==n)
+					team1=i;
+		for(int i=0;n<part_set.getParts().size();n++)
+			for(int j=0;j<part_set.getParts().get(i).getLinks().size();j++)
+				if(part_set.getParts().get(i).getLinks().get(j).getLinkID()==p)
+					team2=i;
+		if(team1!=team2&&team1!=Integer.MAX_VALUE&&team2!=Integer.MAX_VALUE)
+			return true;
+		else {
+			return false;	
+			 }
 	}
 
 	/**
-	 * 求 NUSS_c和P_j的交集
+	 * 姹� NUSS_c鍜孭_j鐨勪氦闆�
 	 * 
 	 * @param srlgs
 	 * @param part_set
