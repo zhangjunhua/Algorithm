@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Map.Entry;
+
+import com.sun.java_cup.internal.runtime.virtual_parse_stack;
+import com.sun.javafx.geom.transform.CanTransformVec3d;
+
 import srmf.global.Constant;
 import srmf.network.Link;
 import srmf.network.Network;
@@ -213,8 +217,9 @@ public class SRMF {
 				   if(adjacencyMatrix[n][p]!=Integer.MAX_VALUE)
 					 if(IsdifferentPairConnect(n,p,part_set))
 					 { 	
-						 m_trail.setLinks(FindPairConnect(n,p,adjacencyMatrix,part_set));
+						m_trail.setLinks(FindPairConnect(n,p,adjacencyMatrix,solution));					
 					 	part_set.getParts().get(GetDifferentTeams(n,p,part_set)[0]).getLinks().addAll(part_set.getParts().get(GetDifferentTeams(n,p,part_set)[1]).getLinks());
+					 	m_trail.setLinks(part_set.getParts().get(GetDifferentTeams(n, p, part_set)[0]).getLinks());
 					 	part_set.getParts().remove(GetDifferentTeams(n, p, part_set)[1]);
 					 	
 					 }
@@ -226,11 +231,11 @@ public class SRMF {
 		// TODO Auto-generated method stub
 		int[] teams=new int[2];
 		int team1=Integer.MAX_VALUE,team2=Integer.MAX_VALUE;
-		for(int i=0;n<part_set.getParts().size();n++)
+		for(int i=0;n<part_set.getParts().size();i++)
 			for(int j=0;j<part_set.getParts().get(i).getLinks().size();j++)
 				if(part_set.getParts().get(i).getLinks().get(j).getLinkID()==n)
 					team1=i;
-		for(int i=0;n<part_set.getParts().size();n++)
+		for(int i=0;n<part_set.getParts().size();i++)
 			for(int j=0;j<part_set.getParts().get(i).getLinks().size();j++)
 				if(part_set.getParts().get(i).getLinks().get(j).getLinkID()==p)
 					team2=i;
@@ -239,21 +244,38 @@ public class SRMF {
 		return teams;
 	}
 
-	private static ArrayList<Link> FindPairConnect(int n, int p,double[][] adjacencyMatrix,Part_set part_set) {
+	private static ArrayList<Link> FindPairConnect(int n, int p,double[][] adjacencyMatrix,Srmf_Solution solution) {
 		// TODO Auto-generated method stub
+		//反向回溯的最短路径发现算法
 		ArrayList<Link> links=new ArrayList<Link>();
-		
+		int iteNode=p,i;
+		do {
+			
+			for(i=0;i<solution.getNetwork().getNodes()[iteNode].getAjacent_links().size();i++)
+			{
+				if(solution.getNetwork().getNodes()[iteNode].getAjacent_links().get(i).getCost()+adjacencyMatrix[solution.getNetwork().getNodes()[iteNode].
+				       getAjacent_links().get(i).getNeighbourNode(solution.getNetwork().getNodes()[iteNode]).getNodeID()][iteNode]==adjacencyMatrix[iteNode][n]);
+				{
+					links.add(solution.getNetwork().getNodes()[iteNode].getAjacent_links().get(i));
+					iteNode=solution.getNetwork().getNodes()[iteNode].
+						       getAjacent_links().get(i).getNeighbourNode(solution.getNetwork().getNodes()[iteNode]).getNodeID();
+					break;
+				}
+			}}
+			//所有的pkj都被连接
+			while(solution.getNetwork().getNodes()[iteNode].
+				       getAjacent_links().get(i).getNeighbourNode(solution.getNetwork().getNodes()[iteNode]).getNodeID()!=n);
 		return links;
 	}
 
 	private static boolean IsdifferentPairConnect(int n, int p,Part_set part_set) {
 		// TODO Auto-generated method stub
 		int team1=Integer.MAX_VALUE,team2=Integer.MAX_VALUE;
-		for(int i=0;n<part_set.getParts().size();n++)
+		for(int i=0;n<part_set.getParts().size();i++)
 			for(int j=0;j<part_set.getParts().get(i).getLinks().size();j++)
 				if(part_set.getParts().get(i).getLinks().get(j).getLinkID()==n)
 					team1=i;
-		for(int i=0;n<part_set.getParts().size();n++)
+		for(int i=0;n<part_set.getParts().size();i++)
 			for(int j=0;j<part_set.getParts().get(i).getLinks().size();j++)
 				if(part_set.getParts().get(i).getLinks().get(j).getLinkID()==p)
 					team2=i;
