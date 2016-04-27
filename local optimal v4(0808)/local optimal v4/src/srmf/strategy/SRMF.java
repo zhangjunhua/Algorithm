@@ -9,6 +9,7 @@ import com.sun.java_cup.internal.runtime.virtual_parse_stack;
 import com.sun.javafx.geom.transform.CanTransformVec3d;
 
 import srmf.global.Constant;
+import srmf.global.Constant.Strategy.ExtendStrategy;
 import srmf.network.Link;
 import srmf.network.Network;
 import srmf.network.Node;
@@ -23,10 +24,6 @@ import srmf.solution.Srmf_Solution;
  *
  */
 public class SRMF {
-	
-	
-	
-	
 
 	/**
 	 * version 1.0 鈥� 2016鈥庡勾鈥�4鈥庢湀鈥�23鈥庢棩 22:35:06
@@ -37,16 +34,32 @@ public class SRMF {
 	public static Srmf_Solution srmf_2016_4_23_1(Network network) {
 		Srmf_Solution optimal_solution = Srmf_Solution
 				.get_initial_solution(network);
-		for (int n = 0; n < Constant.Strategy.N; n++) {
-			Srmf_Solution solution = Srmf_Solution
-					.get_initial_solution(network);
-			while (!solution.is_a_complete_solution()) {
-				M_trail mTrail = nextTrail(solution);
-				solution.insert_Mtrail(mTrail);
+		if (Constant.Strategy.getExtendStrategy() == ExtendStrategy.random) {
+			for (int n = 0; n < Constant.Strategy.N; n++) {
+				System.out.println("iteration:" + n);
+				Srmf_Solution solution = Srmf_Solution
+						.get_initial_solution(network);
+				while (!solution.is_a_complete_solution()) {
+					M_trail mTrail = nextTrail(solution);
+					solution.insert_Mtrail(mTrail);
+				}
+				solution.updataCost(network);
+				optimal_solution = solution.getCost() < optimal_solution
+						.getCost() ? solution : optimal_solution;
 			}
-			solution.updataCost(network);
-			optimal_solution = solution.getCost() < optimal_solution.getCost() ? solution
-					: optimal_solution;
+		} else {
+			for (int n = 0; n < 1; n++) {
+				System.out.println("iteration:" + n);
+				Srmf_Solution solution = Srmf_Solution
+						.get_initial_solution(network);
+				while (!solution.is_a_complete_solution()) {
+					M_trail mTrail = nextTrail(solution);
+					solution.insert_Mtrail(mTrail);
+				}
+				solution.updataCost(network);
+				optimal_solution = solution.getCost() < optimal_solution
+						.getCost() ? solution : optimal_solution;
+			}
 		}
 		return optimal_solution;
 	}
@@ -162,127 +175,151 @@ public class SRMF {
 		return mTrail;
 	}
 
-	
 	/**
 	 * @param part_set
 	 * @param solution
 	 * @return
 	 */
-	public static M_trail connect_parts(Part_set part_set,Srmf_Solution solution){
-		boolean[] edgeFlag =new boolean[solution.getNetwork().getLinks().length];//索引向量
-		double[][] adjacencyMatrix=new double[solution.getNetwork().getNodes().length][solution.getNetwork().getNodes().length];//邻接表
-		M_trail m_trail=new M_trail();
-		//初始化,建立边索引向量
-		for(int i=0;i<solution.getNetwork().getLinks().length;i++)
-		{
-			edgeFlag[solution.getNetwork().getLinks()[i].getLinkID()]=true;
+	public static M_trail connect_parts(Part_set part_set,
+			Srmf_Solution solution) {
+		boolean[] edgeFlag = new boolean[solution.getNetwork().getLinks().length];// 索引向量
+		double[][] adjacencyMatrix = new double[solution.getNetwork()
+				.getNodes().length][solution.getNetwork().getNodes().length];// 邻接表
+		M_trail m_trail = new M_trail();
+		// 初始化,建立边索引向量
+		for (int i = 0; i < solution.getNetwork().getLinks().length; i++) {
+			edgeFlag[solution.getNetwork().getLinks()[i].getLinkID()] = true;
 		}
-		for(int j=0;j<part_set.getParts().size();j++)
-		{
-			for(int k=0;k<part_set.getParts().get(j).getLinks().size();k++)
-			{
-				edgeFlag[part_set.getParts().get(j).getLinks().get(k).getLinkID()]=false;
+		for (int j = 0; j < part_set.getParts().size(); j++) {
+			for (int k = 0; k < part_set.getParts().get(j).getLinks().size(); k++) {
+				edgeFlag[part_set.getParts().get(j).getLinks().get(k)
+						.getLinkID()] = false;
 			}
 		}
-		//建立邻接表
-		for(int l=0;l<solution.getNetwork().getNodes().length;l++)
-		{
-			for(int m=0;m<solution.getNetwork().getNodes().length;m++)
-			{
-				if(solution.getNetwork().ExistAnEdge(l, m))
-				{
-				adjacencyMatrix[l][m]=solution.getNetwork().getLink(l, m).getCost();
-				adjacencyMatrix[m][l]=solution.getNetwork().getLink(l, m).getCost();
+		// 建立邻接表
+		for (int l = 0; l < solution.getNetwork().getNodes().length; l++) {
+			for (int m = 0; m < solution.getNetwork().getNodes().length; m++) {
+				if (solution.getNetwork().ExistAnEdge(l, m)) {
+					adjacencyMatrix[l][m] = solution.getNetwork().getLink(l, m)
+							.getCost();
+					adjacencyMatrix[m][l] = solution.getNetwork().getLink(l, m)
+							.getCost();
+				} else {
+					adjacencyMatrix[l][m] = Integer.MAX_VALUE;
+					adjacencyMatrix[m][l] = Integer.MAX_VALUE;
 				}
-				else {
-					adjacencyMatrix[l][m]=Integer.MAX_VALUE;
-					adjacencyMatrix[m][l]=Integer.MAX_VALUE;
-				}
-				if(edgeFlag[solution.getNetwork().getLink(l, m).getLinkID()]==false)
-					adjacencyMatrix[l][m]=Integer.MAX_VALUE;
-					adjacencyMatrix[m][l]=Integer.MAX_VALUE;
+				if (edgeFlag[solution.getNetwork().getLink(l, m).getLinkID()] == false)
+					adjacencyMatrix[l][m] = Integer.MAX_VALUE;
+				adjacencyMatrix[m][l] = Integer.MAX_VALUE;
 			}
 		}
-		//Floyd算法
-		      for(int k=0;k<solution.getNetwork().getNodes().length;k++)
-		         for(int i=0;i<solution.getNetwork().getNodes().length;i++)
-		              for(int j=0;j<solution.getNetwork().getNodes().length;j++)
-		                 if(adjacencyMatrix[i][k]+adjacencyMatrix[k][j]<adjacencyMatrix[i][j])
-		                	 adjacencyMatrix[i][j]=adjacencyMatrix[i][k]+adjacencyMatrix[k][j];
-		 //连接pkj
-		   for(int n=0;n<solution.getNetwork().getNodes().length;n++)
-			   for(int p=0;p<solution.getNetwork().getNodes().length;p++)
-			   {
-				   if(adjacencyMatrix[n][p]!=Integer.MAX_VALUE)
-					 if(IsdifferentPairConnect(n,p,part_set))
-					 { 	
-						m_trail.setLinks(FindPairConnect(n,p,adjacencyMatrix,solution));					
-					 	part_set.getParts().get(GetDifferentTeams(n,p,part_set)[0]).getLinks().addAll(part_set.getParts().get(GetDifferentTeams(n,p,part_set)[1]).getLinks());
-					 	m_trail.setLinks(part_set.getParts().get(GetDifferentTeams(n, p, part_set)[0]).getLinks());
-					 	part_set.getParts().remove(GetDifferentTeams(n, p, part_set)[1]);
-					 	
-					 }
-			   }
+		// Floyd算法
+		for (int k = 0; k < solution.getNetwork().getNodes().length; k++)
+			for (int i = 0; i < solution.getNetwork().getNodes().length; i++)
+				for (int j = 0; j < solution.getNetwork().getNodes().length; j++)
+					if (adjacencyMatrix[i][k] + adjacencyMatrix[k][j] < adjacencyMatrix[i][j])
+						adjacencyMatrix[i][j] = adjacencyMatrix[i][k]
+								+ adjacencyMatrix[k][j];
+		// 连接pkj
+		for (int n = 0; n < solution.getNetwork().getNodes().length; n++)
+			for (int p = 0; p < solution.getNetwork().getNodes().length; p++) {
+				if (adjacencyMatrix[n][p] != Integer.MAX_VALUE)
+					if (IsdifferentPairConnect(n, p, part_set)) {
+						m_trail.setLinks(FindPairConnect(n, p, adjacencyMatrix,
+								solution));
+						part_set.getParts()
+								.get(GetDifferentTeams(n, p, part_set)[0])
+								.getLinks()
+								.addAll(part_set
+										.getParts()
+										.get(GetDifferentTeams(n, p, part_set)[1])
+										.getLinks());
+						m_trail.setLinks(part_set.getParts()
+								.get(GetDifferentTeams(n, p, part_set)[0])
+								.getLinks());
+						part_set.getParts().remove(
+								GetDifferentTeams(n, p, part_set)[1]);
+
+					}
+			}
 		return m_trail;
 	}
 
 	private static int[] GetDifferentTeams(int n, int p, Part_set part_set) {
 		// TODO Auto-generated method stub
-		int[] teams=new int[2];
-		int team1=Integer.MAX_VALUE,team2=Integer.MAX_VALUE;
-		for(int i=0;n<part_set.getParts().size();i++)
-			for(int j=0;j<part_set.getParts().get(i).getLinks().size();j++)
-				if(part_set.getParts().get(i).getLinks().get(j).getLinkID()==n)
-					team1=i;
-		for(int i=0;n<part_set.getParts().size();i++)
-			for(int j=0;j<part_set.getParts().get(i).getLinks().size();j++)
-				if(part_set.getParts().get(i).getLinks().get(j).getLinkID()==p)
-					team2=i;
-		teams[0]=team1;
-		teams[1]=team2;	
+		int[] teams = new int[2];
+		int team1 = Integer.MAX_VALUE, team2 = Integer.MAX_VALUE;
+		for (int i = 0; n < part_set.getParts().size(); i++)
+			for (int j = 0; j < part_set.getParts().get(i).getLinks().size(); j++)
+				if (part_set.getParts().get(i).getLinks().get(j).getLinkID() == n)
+					team1 = i;
+		for (int i = 0; n < part_set.getParts().size(); i++)
+			for (int j = 0; j < part_set.getParts().get(i).getLinks().size(); j++)
+				if (part_set.getParts().get(i).getLinks().get(j).getLinkID() == p)
+					team2 = i;
+		teams[0] = team1;
+		teams[1] = team2;
 		return teams;
 	}
 
-	private static ArrayList<Link> FindPairConnect(int n, int p,double[][] adjacencyMatrix,Srmf_Solution solution) {
+	private static ArrayList<Link> FindPairConnect(int n, int p,
+			double[][] adjacencyMatrix, Srmf_Solution solution) {
 		// TODO Auto-generated method stub
-		//反向回溯的最短路径发现算法
-		ArrayList<Link> links=new ArrayList<Link>();
-		int iteNode=p,i;
+		// 反向回溯的最短路径发现算法
+		ArrayList<Link> links = new ArrayList<Link>();
+		int iteNode = p, i;
 		do {
-			
-			for(i=0;i<solution.getNetwork().getNodes()[iteNode].getAjacent_links().size();i++)
-			{
-				if(solution.getNetwork().getNodes()[iteNode].getAjacent_links().get(i).getCost()+adjacencyMatrix[solution.getNetwork().getNodes()[iteNode].
-				       getAjacent_links().get(i).getNeighbourNode(solution.getNetwork().getNodes()[iteNode]).getNodeID()][iteNode]==adjacencyMatrix[iteNode][n]);
+
+			for (i = 0; i < solution.getNetwork().getNodes()[iteNode]
+					.getAjacent_links().size(); i++) {
+				if (solution.getNetwork().getNodes()[iteNode]
+						.getAjacent_links().get(i).getCost()
+						+ adjacencyMatrix[solution.getNetwork().getNodes()[iteNode]
+								.getAjacent_links()
+								.get(i)
+								.getNeighbourNode(
+										solution.getNetwork().getNodes()[iteNode])
+								.getNodeID()][iteNode] == adjacencyMatrix[iteNode][n])
+					;
 				{
-					links.add(solution.getNetwork().getNodes()[iteNode].getAjacent_links().get(i));
-					iteNode=solution.getNetwork().getNodes()[iteNode].
-						       getAjacent_links().get(i).getNeighbourNode(solution.getNetwork().getNodes()[iteNode]).getNodeID();
+					links.add(solution.getNetwork().getNodes()[iteNode]
+							.getAjacent_links().get(i));
+					iteNode = solution.getNetwork().getNodes()[iteNode]
+							.getAjacent_links()
+							.get(i)
+							.getNeighbourNode(
+									solution.getNetwork().getNodes()[iteNode])
+							.getNodeID();
 					break;
 				}
-			}}
-			//所有的pkj都被连接
-			while(solution.getNetwork().getNodes()[iteNode].
-				       getAjacent_links().get(i).getNeighbourNode(solution.getNetwork().getNodes()[iteNode]).getNodeID()!=n);
+			}
+		}
+		// 所有的pkj都被连接
+		while (solution.getNetwork().getNodes()[iteNode].getAjacent_links()
+				.get(i)
+				.getNeighbourNode(solution.getNetwork().getNodes()[iteNode])
+				.getNodeID() != n);
 		return links;
 	}
 
-	private static boolean IsdifferentPairConnect(int n, int p,Part_set part_set) {
+	private static boolean IsdifferentPairConnect(int n, int p,
+			Part_set part_set) {
 		// TODO Auto-generated method stub
-		int team1=Integer.MAX_VALUE,team2=Integer.MAX_VALUE;
-		for(int i=0;n<part_set.getParts().size();i++)
-			for(int j=0;j<part_set.getParts().get(i).getLinks().size();j++)
-				if(part_set.getParts().get(i).getLinks().get(j).getLinkID()==n)
-					team1=i;
-		for(int i=0;n<part_set.getParts().size();i++)
-			for(int j=0;j<part_set.getParts().get(i).getLinks().size();j++)
-				if(part_set.getParts().get(i).getLinks().get(j).getLinkID()==p)
-					team2=i;
-		if(team1!=team2&&team1!=Integer.MAX_VALUE&&team2!=Integer.MAX_VALUE)
+		int team1 = Integer.MAX_VALUE, team2 = Integer.MAX_VALUE;
+		for (int i = 0; n < part_set.getParts().size(); i++)
+			for (int j = 0; j < part_set.getParts().get(i).getLinks().size(); j++)
+				if (part_set.getParts().get(i).getLinks().get(j).getLinkID() == n)
+					team1 = i;
+		for (int i = 0; n < part_set.getParts().size(); i++)
+			for (int j = 0; j < part_set.getParts().get(i).getLinks().size(); j++)
+				if (part_set.getParts().get(i).getLinks().get(j).getLinkID() == p)
+					team2 = i;
+		if (team1 != team2 && team1 != Integer.MAX_VALUE
+				&& team2 != Integer.MAX_VALUE)
 			return true;
 		else {
-			return false;	
-			 }
+			return false;
+		}
 	}
 
 	/**
