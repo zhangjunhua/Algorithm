@@ -123,7 +123,6 @@ public class SRMF {
 		// 把ex_node放入Part
 		Part part = Part.get_initial_part(ex_node);
 		part_set.addPart(part);
-		// 拓展part
 		double[] weight = new double[ex_node.getAjacent_links().size()];
 
 		ArrayList<Link> links = new ArrayList<>();
