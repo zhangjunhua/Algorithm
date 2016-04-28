@@ -69,9 +69,10 @@ public class Network {
 		// TODO Auto-generated method stub
 		StringBuffer stringBuffer = new StringBuffer();
 		for (int i = 0; i < nodes.length; i++)
-			stringBuffer.append(nodes[i].toString() + "\n");
+			stringBuffer.append(nodes[i].toString());
+		System.out.println();
 		for (int i = 0; i < links.length; i++)
-			stringBuffer.append(links[i].toString() + "\n");
+			stringBuffer.append(links[i].toString());
 		return stringBuffer.toString();
 	}
 

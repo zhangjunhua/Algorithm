@@ -10,6 +10,7 @@ import com.sun.javafx.geom.transform.CanTransformVec3d;
 
 import srmf.global.Constant;
 import srmf.global.Constant.Strategy.ExtendStrategy;
+import srmf.libs.ProcessResult;
 import srmf.network.Link;
 import srmf.network.Network;
 import srmf.network.Node;
@@ -37,6 +38,7 @@ public class SRMF {
 		if (Constant.Strategy.getExtendStrategy() == ExtendStrategy.random) {
 			for (int n = 0; n < Constant.Strategy.N; n++) {
 				System.out.println("iteration:" + n);
+				System.out.println(network);
 				Srmf_Solution solution = Srmf_Solution
 						.get_initial_solution(network);
 				while (!solution.is_a_complete_solution()) {
@@ -168,6 +170,12 @@ public class SRMF {
 				for (SRLG srlg : value) {
 					links.add(srlg.getLinks().get(0));
 				}
+			}
+			try {
+				ProcessResult.processTrail(1,
+						connect_parts(new Part_set(), solution));
+			} catch (Exception e) {
+				// TODO: handle exception
 			}
 		}
 		M_trail mTrail = new M_trail();

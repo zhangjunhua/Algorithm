@@ -9,6 +9,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import srmf.solution.M_trail;
 import srmf.solution.Srmf_Solution;
 
 public class ProcessResult {
@@ -114,6 +115,13 @@ public class ProcessResult {
 
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	public static void processTrail(int num,M_trail mTrail) {
+		try {
+			Thread.sleep(num);
+		} catch (InterruptedException e) {
 		}
 	}
 
