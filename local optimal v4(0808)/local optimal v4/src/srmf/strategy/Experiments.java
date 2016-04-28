@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import srmf.global.Constant;
 import srmf.global.Constant.Strategy.ExtendStrategy;
 import srmf.global.Constant.Strategy.WeightStrategy;
+import srmf.libs.ProcessResult;
 import srmf.network.Network;
 import srmf.network.SRLG;
 import srmf.network.generator.NetworkGenerator;
-import srmf.output.ResultOutPut;
 import srmf.solution.Srmf_Solution;
 
 /**
@@ -126,7 +126,7 @@ public class Experiments {
 			Srmf_Solution solution2 = SRMF.srmf_2016_4_23_1(network);
 			solution_maxWt.add(solution2);
 		}
-		ResultOutPut.outputExperiemnt1(Solution_rand, solution_maxWt);
+		ProcessResult.process1(Solution_rand, solution_maxWt);
 	}
 
 	/**
@@ -186,7 +186,7 @@ public class Experiments {
 			Srmf_Solution solution2 = SRMF.srmf_2016_4_23_1(network);
 			solution_noDeg.add(solution2);
 		}
-		ResultOutPut.outputExperiemnt2(Solution_useDeg, solution_noDeg);
+		ProcessResult.process2(Solution_useDeg, solution_noDeg);
 	}
 
 	/**
@@ -310,7 +310,7 @@ public class Experiments {
 			time_deg6.add(System.currentTimeMillis() - now);
 		}
 
-		ResultOutPut.outputExperiemnt3(Solution_useDeg, time_deg3, time_deg6);
+		ProcessResult.process3(Solution_useDeg, time_deg3, time_deg6);
 	}
 
 	/**
@@ -370,7 +370,7 @@ public class Experiments {
 				solutionSS.get(j).add(solution);
 			}
 		}
-		ResultOutPut.outputExperiemnt4(solutionSS);
+		ProcessResult.process4(solutionSS);
 	}
 
 	/**
@@ -429,6 +429,6 @@ public class Experiments {
 				solutionSS.get(j).add(solution);
 			}
 		}
-		ResultOutPut.outputExperiemnt5(solutionSS);
+		ProcessResult.process5(solutionSS);
 	}
 }
